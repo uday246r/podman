@@ -1,0 +1,4 @@
+VITE_EMPLOYEE_MF_URL=https://employeesfederation.onrender.com/assets/remoteEntry.js
+VITE_ASSET_MF_URL=https://assetmanagementsystem-0sqh.onrender.com/assets/remoteEntry.js
+VITE_HELPDESK_MF_URL=https://helpdesk-frontend-45xw.onrender.com/assets/remoteEntry.js
+VITE_INVENTORY_MF_URL=https://inventorymanagement-rm.onrender.com/assets/remoteEntry.js

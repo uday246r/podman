@@ -1,0 +1,5 @@
+/assets/*
+  Access-Control-Allow-Origin: *
+
+/remoteEntry.js
+  Access-Control-Allow-Origin: *

@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+
+host-app:
+build:
+context: ./host-app
+container_name: host-app
+ports:
+- "3000:80"
+restart: always
+depends_on:
+- employee-mf
+
+employee-mf:
+build:
+context: ./federations/employee_mf
+container_name: employee-mf
+ports:
+- "5001:80"
+restart: always
+depends_on:
+- employee-api
+
+employee-api:
+build:
+context: ./backend/EmployeeService
+container_name: employee-api
+ports:
+- "8081:8081"
+environment:
+ASPNETCORE_ENVIRONMENT: Production
+restart: always
+depends_on:
+- employee-db
+
+employee-db:
+image: postgres:17-alpine
+container_name: employee-db
+restart: always
+environment:
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: postgres
+POSTGRES_DB: employeeManagement
+ports:
+- "5432:5432"
+volumes:
+- employee-db-data:/var/lib/postgresql/data
+
+volumes:
+employee-db-data:
