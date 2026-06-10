@@ -21,10 +21,18 @@ builder.Services.AddCors(options =>
         });
 });
 
+using Microsoft.EntityFrameworkCore;
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
 app.ConfigurePipeline();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EmployeeService.Data.AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

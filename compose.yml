@@ -1,51 +1,165 @@
 version: "3.9"
 
 services:
+  # ==========================================
+  # Database Container (Shared by all APIs)
+  # ==========================================
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-employeeManagement}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
 
-host-app:
-build:
-context: ./host-app
-container_name: host-app
-ports:
-- "3000:80"
-restart: always
-depends_on:
-- employee-mf
+  # ==========================================
+  # Backend API Services
+  # ==========================================
+  auth-api:
+    build:
+      context: ./backend/AuthService
+      dockerfile: Dockerfile
+    container_name: auth-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=authService;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5005:8080"
+    depends_on:
+      - postgres-db
 
-employee-mf:
-build:
-context: ./federations/employee_mf
-container_name: employee-mf
-ports:
-- "5001:80"
-restart: always
-depends_on:
-- employee-api
+  employee-api:
+    build:
+      context: ./backend/EmployeeService
+      dockerfile: Dockerfile
+    container_name: employee-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=employeeManagement;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-db
 
-employee-api:
-build:
-context: ./backend/EmployeeService
-container_name: employee-api
-ports:
-- "8081:8081"
-environment:
-ASPNETCORE_ENVIRONMENT: Production
-restart: always
-depends_on:
-- employee-db
+  asset-api:
+    build:
+      context: ./backend/AssetService
+      dockerfile: Dockerfile
+    container_name: asset-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=asset_management_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5088:10000"
+    depends_on:
+      - postgres-db
 
-employee-db:
-image: postgres:17-alpine
-container_name: employee-db
-restart: always
-environment:
-POSTGRES_USER: postgres
-POSTGRES_PASSWORD: postgres
-POSTGRES_DB: employeeManagement
-ports:
-- "5432:5432"
+  helpdesk-api:
+    build:
+      context: ./backend/HelpDeskService
+      dockerfile: Containerfile
+    container_name: helpdesk-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=HelpdeskDB;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ApplyMigrationsOnStartup: "true"
+    ports:
+      - "5007:8080"
+    depends_on:
+      - postgres-db
+
+  inventory-api:
+    build:
+      context: ./backend/InventoryService/Inventory.API
+      dockerfile: Containerfile
+    container_name: inventory-api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=inventorydb;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5267:8080"
+    depends_on:
+      - postgres-db
+
+  # ==========================================
+  # Frontend Micro-Frontend Services
+  # ==========================================
+  host-app:
+    build:
+      context: ./host-app
+      dockerfile: Dockerfile
+      args:
+        - VITE_EMPLOYEE_MF_URL=${VITE_EMPLOYEE_MF_URL:-http://${HOST_IP:-localhost}:5001/assets/remoteEntry.js}
+        - VITE_ASSET_MF_URL=${VITE_ASSET_MF_URL:-http://${HOST_IP:-localhost}:5003/assets/remoteEntry.js}
+        - VITE_HELPDESK_MF_URL=${VITE_HELPDESK_MF_URL:-http://${HOST_IP:-localhost}:5004/assets/remoteEntry.js}
+        - VITE_INVENTORY_MF_URL=${VITE_INVENTORY_MF_URL:-http://${HOST_IP:-localhost}:5002/assets/remoteEntry.js}
+        - VITE_AUTH_API=${VITE_AUTH_API:-http://${HOST_IP:-localhost}:5005}
+    container_name: host-app
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - employee-mf
+      - asset-mf
+      - helpdesk-mf
+      - inventory-mf
+      - auth-api
+
+  employee-mf:
+    build:
+      context: ./federations/employee_mf
+      dockerfile: Dockerfile
+      args:
+        - VITE_EMPLOYEE_API=${VITE_EMPLOYEE_API:-http://${HOST_IP:-localhost}:8081/api}
+        - VITE_AUTH_API=${VITE_AUTH_API:-http://${HOST_IP:-localhost}:5005}
+    container_name: employee-mf
+    restart: always
+    ports:
+      - "5001:80"
+
+  inventory-mf:
+    build:
+      context: ./federations/inventory_mf
+      dockerfile: Containerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5267/api/product}
+    container_name: inventory-mf
+    restart: always
+    ports:
+      - "5002:80"
+
+  asset-mf:
+    build:
+      context: ./federations/asset_mf
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://${HOST_IP:-localhost}:5088/api}
+    container_name: asset-mf
+    restart: always
+    ports:
+      - "5003:80"
+
+  helpdesk-mf:
+    build:
+      context: ./federations/helpdesk_mf
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5007/api}
+    container_name: helpdesk-mf
+    restart: always
+    ports:
+      - "5004:80"
+
 volumes:
-- employee-db-data:/var/lib/postgresql/data
-
-volumes:
-employee-db-data:
+  postgres-db-data:

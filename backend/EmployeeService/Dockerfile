@@ -3,10 +3,7 @@ WORKDIR /src
 COPY ["EmployeeService.csproj", "./"]
 RUN dotnet restore "EmployeeService.csproj"
 COPY . .
-RUN dotnet publish "EmployeeService.csproj" 
--c Release 
--o /app/publish
-/p=false
+RUN dotnet publish "EmployeeService.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

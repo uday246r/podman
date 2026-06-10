@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\HelpDeskService\\HelpdeskService.csproj": {}
+    "/Users/tusharvashisht/Desktop/podman/backend/HelpDeskService/HelpdeskService.csproj": {}
   },
   "projects": {
-    "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\HelpDeskService\\HelpdeskService.csproj": {
+    "/Users/tusharvashisht/Desktop/podman/backend/HelpDeskService/HelpdeskService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\HelpDeskService\\HelpdeskService.csproj",
+        "projectUniqueName": "/Users/tusharvashisht/Desktop/podman/backend/HelpDeskService/HelpdeskService.csproj",
         "projectName": "HelpdeskService",
-        "projectPath": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\HelpDeskService\\HelpdeskService.csproj",
-        "packagesPath": "C:\\Users\\udayo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\HelpDeskService\\obj\\",
+        "projectPath": "/Users/tusharvashisht/Desktop/podman/backend/HelpDeskService/HelpdeskService.csproj",
+        "packagesPath": "/Users/tusharvashisht/.nuget/packages/",
+        "outputPath": "/Users/tusharvashisht/Desktop/podman/backend/HelpDeskService/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\udayo\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/tusharvashisht/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -86,7 +86,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.204/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

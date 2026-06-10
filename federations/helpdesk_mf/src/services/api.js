@@ -1,4 +1,4 @@
-const BASE_URL = 'https://helpdesk-n6cw.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://helpdesk-n6cw.onrender.com/api';
 
 const isTokenExpired = (token) => {
   if (!token) return true;
