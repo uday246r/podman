@@ -1,8 +1,10 @@
 using EmployeeService.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -20,8 +22,6 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
-
-using Microsoft.EntityFrameworkCore;
 
 var app = builder.Build();
 
