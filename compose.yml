@@ -133,7 +133,7 @@ services:
       context: ./federations/inventory_mf
       dockerfile: Containerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5267/api/product}
+        - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5267/api}
     container_name: inventory-mf
     restart: always
     ports:

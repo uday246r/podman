@@ -1,8 +1,8 @@
 import React from "react";
 
-const loadRemote = async (importFn, remoteName) => {
+const loadRemote = async (importPromise, remoteName) => {
   try {
-    return await importFn();
+    return await importPromise;
   } catch (error) {
     console.error(`${remoteName} failed to load`, error);
 

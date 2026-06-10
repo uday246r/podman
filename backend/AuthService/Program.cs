@@ -49,6 +49,15 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthService.Data.ApplicationDbContext>();
     db.Database.Migrate();
+
+    if (!db.Users.Any())
+    {
+        db.Users.AddRange(
+            new AuthService.Models.User { Email = "admin@gmail.com", Password = "password" },
+            new AuthService.Models.User { Email = "admin@gmail.com", Password = "123456" }
+        );
+        db.SaveChanges();
+    }
 }
 
 app.Run();
