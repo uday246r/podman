@@ -19,7 +19,7 @@ function Login() {
     try {
 
       const response = await axios.post(
-        `${API_CONFIG.AUTH_API}/api/auth/login`,
+        "https://reactmodulefederation-plus-dotnet10.onrender.com/api/auth/login",
         {
           email,
           password,

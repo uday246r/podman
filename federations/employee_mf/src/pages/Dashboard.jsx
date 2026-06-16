@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createUser } from "../services/authService";
 import EmployeeTable from "../components/EmployeeTable";
 import EmployeeModal from "../components/EmployeeModal";
 import {
@@ -45,13 +46,25 @@ function Dashboard() {
   };
 
   const handleSubmit = async (payload) => {
-    if (selectedEmployee) {
-      await updateEmployee(selectedEmployee.id, payload);
-    } else {
-      await createEmployee(payload);
+    try {
+      if (selectedEmployee) {
+        await updateEmployee(selectedEmployee.id, payload);
+      } else {
+        // First create user in Auth Service
+        await createUser({
+          email: payload.email,
+          password: "Password@123", // Default password
+          roleId: payload.roleId
+        });
+        // Then create employee in Employee Service
+        await createEmployee(payload);
+      }
+      setIsModalOpen(false);
+      loadEmployees();
+    } catch (error) {
+      console.error("Error saving employee/user:", error);
+      alert("Failed to save. Please ensure the email is unique or check the server logs.");
     }
-    setIsModalOpen(false);
-    loadEmployees();
   };
 
   return (

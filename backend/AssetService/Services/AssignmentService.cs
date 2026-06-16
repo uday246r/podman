@@ -12,7 +12,6 @@ public class AssignmentService(AppDbContext context) : IAssignmentService
         return await context.Assignments
             .AsNoTracking()
             .Include(a => a.Asset)
-            .Include(a => a.Employee)
             .OrderByDescending(a => a.AssignedDate)
             .ThenByDescending(a => a.Id)
             .Select(a => ToDto(a))
@@ -24,7 +23,6 @@ public class AssignmentService(AppDbContext context) : IAssignmentService
         return await context.Assignments
             .AsNoTracking()
             .Include(a => a.Asset)
-            .Include(a => a.Employee)
             .Where(a => a.Id == id)
             .Select(a => ToDto(a))
             .FirstOrDefaultAsync();
@@ -38,11 +36,8 @@ public class AssignmentService(AppDbContext context) : IAssignmentService
             return (null, "Asset not found.");
         }
 
-        var employeeExists = await context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
-        if (!employeeExists)
-        {
-            return (null, "Employee not found.");
-        }
+        // We are assuming EmployeeId is valid since we rely on EmployeeService now
+        // A distributed validation could happen here via gRPC or HTTP call
 
         var hasActiveAssignment = await context.Assignments
             .AnyAsync(a => a.AssetId == dto.AssetId && a.ReturnedDate == null);
@@ -98,7 +93,7 @@ public class AssignmentService(AppDbContext context) : IAssignmentService
             assignment.AssetId,
             assignment.Asset?.AssetName ?? string.Empty,
             assignment.EmployeeId,
-            assignment.Employee?.Name ?? string.Empty,
+            string.Empty, // EmployeeName should be resolved in the front-end or via API Gateway
             assignment.AssignedDate,
             assignment.ReturnedDate);
 }

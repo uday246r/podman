@@ -22,7 +22,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Services
 builder.Services.AddScoped<IAssetService, AssetService>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
@@ -35,6 +34,12 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+});
+
+// Register HttpClient for AuthServiceClient
+builder.Services.AddHttpClient("AuthServiceClient", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5001"); // Assume AuthService runs here
 });
 
 var app = builder.Build();
@@ -52,6 +57,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("FrontendCors");
+
+// Add Permission Middleware
+app.UseMiddleware<AssetManagementSystem.Api.Middleware.PermissionMiddleware>();
 
 app.MapControllers();
 

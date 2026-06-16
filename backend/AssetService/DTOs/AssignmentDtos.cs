@@ -6,7 +6,7 @@ public record AssignmentDto(
     int Id,
     int AssetId,
     string AssetName,
-    int EmployeeId,
+    Guid EmployeeId,
     string EmployeeName,
     DateOnly AssignedDate,
     DateOnly? ReturnedDate);
@@ -17,7 +17,7 @@ public class AssignmentCreateDto
     public int AssetId { get; set; }
 
     [Required]
-    public int EmployeeId { get; set; }
+    public Guid EmployeeId { get; set; }
 
     [Required]
     public DateOnly AssignedDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);

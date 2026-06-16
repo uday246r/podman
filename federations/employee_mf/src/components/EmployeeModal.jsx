@@ -1,23 +1,36 @@
 import { useEffect, useState } from "react";
+import { getRoles } from "../services/authService";
 import "../styles/modal.css";
 
 function EmployeeModal({ isOpen, onClose, onSubmit, selectedEmployee }) {
+  const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     department: "",
     salary: "",
+    roleId: "",
   });
 
   useEffect(() => {
+    if (isOpen) {
+      getRoles().then(setRoles).catch(console.error);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (selectedEmployee) {
-      setFormData(selectedEmployee);
+      setFormData({
+        ...selectedEmployee,
+        roleId: selectedEmployee.roleId || "",
+      });
     } else {
       setFormData({
         name: "",
         email: "",
         department: "",
         salary: "",
+        roleId: "",
       });
     }
   }, [selectedEmployee, isOpen]);
@@ -96,6 +109,22 @@ function EmployeeModal({ isOpen, onClose, onSubmit, selectedEmployee }) {
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Role</label>
+            <select
+              name="roleId"
+              value={formData.roleId}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>Select a role</option>
+              {roles.map(r => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))
+              }
+            </select>
           </div>
 
           <button type="submit" className="submit-btn">

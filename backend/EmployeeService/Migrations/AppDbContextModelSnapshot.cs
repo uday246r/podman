@@ -43,6 +43,9 @@ namespace EmployeeService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("Salary")
                         .HasColumnType("numeric");
 

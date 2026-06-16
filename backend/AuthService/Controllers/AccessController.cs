@@ -1,0 +1,34 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AuthService.Data;
+
+namespace AuthService.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AccessController : ControllerBase
+{
+    private readonly ApplicationDbContext _context;
+
+    public AccessController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("UserPermissions/{userId}")]
+    public async Task<IActionResult> GetUserPermissions(int userId)
+    {
+        var roleIds = await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync();
+
+        var permissions = await _context.RolePermissions
+            .Where(rp => roleIds.Contains(rp.RoleId))
+            .Select(rp => rp.Permission)
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(permissions);
+    }
+}

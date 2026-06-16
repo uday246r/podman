@@ -16,7 +16,6 @@ public class DashboardService(AppDbContext context) : IDashboardService
         var recentAssignments = await context.Assignments
             .AsNoTracking()
             .Include(a => a.Asset)
-            .Include(a => a.Employee)
             .OrderByDescending(a => a.AssignedDate)
             .ThenByDescending(a => a.Id)
             .Take(5)
@@ -25,7 +24,7 @@ public class DashboardService(AppDbContext context) : IDashboardService
                 a.AssetId,
                 a.Asset!.AssetName,
                 a.EmployeeId,
-                a.Employee!.Name,
+                string.Empty,
                 a.AssignedDate,
                 a.ReturnedDate))
             .ToListAsync();

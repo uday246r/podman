@@ -11,4 +11,8 @@ public class EmployeeResponse
     public string Department { get; set; } = string.Empty;
 
     public decimal Salary { get; set; }
+
+    public int RoleId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 }

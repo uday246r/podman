@@ -29,11 +29,11 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=authService;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__DefaultConnection: Host=ep-young-hat-apvqgmun.c-7.us-east-1.aws.neon.tech;Port=5432;Database=authService;Username=neondb_owner;Password=npg_9rmtwPbaCF1G; SSL Mode=Require;Trust Server Certificate=true
     ports:
       - "5005:8080"
-    depends_on:
-      - postgres-db
+    # depends_on:
+    #   - postgres-db
 
   employee-api:
     build:
@@ -43,11 +43,11 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=employeeManagement;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__DefaultConnection: Host=ep-lively-sunset-applrdrk.c-7.us-east-1.aws.neon.tech;Port=5432;Database=employeeManagement;Username=neondb_owner;Password=npg_Teco3MhA7UbE;SSL Mode=Require;Trust Server Certificate=true
     ports:
       - "8081:8081"
-    depends_on:
-      - postgres-db
+    # depends_on:
+    #   - postgres-db
 
   asset-api:
     build:

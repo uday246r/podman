@@ -10,7 +10,10 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AccessGuard from "../components/AccessGuard";
 import loadRemote from "../utils/loadRemote";
+import PermissionManagement from "../pages/Admin/PermissionManagement";
+import ModuleMaintenance from "../pages/Admin/ModuleMaintenance";
 
 
 const EmployeeApp = lazy(() =>
@@ -64,9 +67,11 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<h2>Loading...</h2>}>
-                  <EmployeeApp />
-                </Suspense>
+                <AccessGuard moduleName="EmployeeModule">
+                  <Suspense fallback={<h2>Loading...</h2>}>
+                    <EmployeeApp />
+                  </Suspense>
+                </AccessGuard>
               </MainLayout>
             </ProtectedRoute>
           }
@@ -77,9 +82,11 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<h2>Loading...</h2>}>
-                  <InventoryApp />
-                </Suspense>
+                <AccessGuard moduleName="InventoryModule">
+                  <Suspense fallback={<h2>Loading...</h2>}>
+                    <InventoryApp />
+                  </Suspense>
+                </AccessGuard>
               </MainLayout>
             </ProtectedRoute>
           }
@@ -90,9 +97,11 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<h2>Loading...</h2>}>
-                  <AssetApp />
-                </Suspense>
+                <AccessGuard moduleName="AssetsModule">
+                  <Suspense fallback={<h2>Loading...</h2>}>
+                    <AssetApp />
+                  </Suspense>
+                </AccessGuard>
               </MainLayout>
             </ProtectedRoute>
           }
@@ -103,9 +112,37 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<h2>Loading...</h2>}>
-                  <HelpdeskApp />
-                </Suspense>
+                <AccessGuard moduleName="HelpdeskModule">
+                  <Suspense fallback={<h2>Loading...</h2>}>
+                    <HelpdeskApp />
+                  </Suspense>
+                </AccessGuard>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/permissions"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AccessGuard moduleName="PermissionManagement">
+                  <PermissionManagement />
+                </AccessGuard>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/maintenance"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AccessGuard moduleName="ModuleMaintenance">
+                  <ModuleMaintenance />
+                </AccessGuard>
               </MainLayout>
             </ProtectedRoute>
           }

@@ -22,9 +22,10 @@ function Sidebar({ collapsed, toggleCollapse, mobileOpen, closeMobile }) {
         <ul>
           <li>
             <NavLink 
-              to="." 
+              to="/inventory" 
               onClick={closeMobile} 
               className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+              end
             >
               <FiGrid className="nav-icon" />
               <span className="nav-text">Dashboard</span>
@@ -32,7 +33,7 @@ function Sidebar({ collapsed, toggleCollapse, mobileOpen, closeMobile }) {
           </li>
           <li>
             <NavLink 
-              to="products" 
+              to="/inventory/products" 
               onClick={closeMobile} 
               className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
             >
