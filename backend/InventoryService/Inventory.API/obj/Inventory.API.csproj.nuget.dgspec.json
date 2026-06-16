@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/tusharvashisht/Desktop/podman/backend/InventoryService/Inventory.API/Inventory.API.csproj": {}
+    "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\InventoryService\\Inventory.API\\Inventory.API.csproj": {}
   },
   "projects": {
-    "/Users/tusharvashisht/Desktop/podman/backend/InventoryService/Inventory.API/Inventory.API.csproj": {
+    "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\InventoryService\\Inventory.API\\Inventory.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/tusharvashisht/Desktop/podman/backend/InventoryService/Inventory.API/Inventory.API.csproj",
+        "projectUniqueName": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\InventoryService\\Inventory.API\\Inventory.API.csproj",
         "projectName": "Inventory.API",
-        "projectPath": "/Users/tusharvashisht/Desktop/podman/backend/InventoryService/Inventory.API/Inventory.API.csproj",
-        "packagesPath": "/Users/tusharvashisht/.nuget/packages/",
-        "outputPath": "/Users/tusharvashisht/Desktop/podman/backend/InventoryService/Inventory.API/obj/",
+        "projectPath": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\InventoryService\\Inventory.API\\Inventory.API.csproj",
+        "packagesPath": "C:\\Users\\udayo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\udayo\\OneDrive\\Desktop\\Podman\\backend\\InventoryService\\Inventory.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/tusharvashisht/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\udayo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -92,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.204/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
