@@ -31,4 +31,15 @@ public class AccessController : ControllerBase
 
         return Ok(permissions);
     }
+
+    [HttpGet("UserRoleName/{userId}")]
+    public async Task<IActionResult> GetUserRoleName(int userId)
+    {
+        var roleName = await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.Role.Name)
+            .FirstOrDefaultAsync();
+
+        return Ok(new { roleName = roleName ?? "admin" });
+    }
 }

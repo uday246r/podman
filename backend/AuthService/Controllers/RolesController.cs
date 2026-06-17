@@ -18,17 +18,20 @@ public class RolesController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetRoles()
-{
-    var roles = await _context.Roles
-        .Select(r => new
-        {
-            r.Id,
-            r.Name
-        })
-        .ToListAsync();
+    {
+        var roles = await _context.Roles
+            .Include(r => r.RolePermissions)
+            .Select(r => new
+            {
+                r.Id,
+                r.Name,
+                r.Description,
+                RolePermissions = r.RolePermissions.Select(rp => new { rp.PermissionId }).ToList()
+            })
+            .ToListAsync();
 
-    return Ok(roles);
-}
+        return Ok(roles);
+    }
 
     [HttpPost]
     public async Task<IActionResult> CreateRole([FromBody] Role role)
@@ -53,6 +56,26 @@ public class RolesController : ControllerBase
         var role = await _context.Roles.FindAsync(id);
         if (role == null) return NotFound();
         _context.Roles.Remove(role);
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
+
+    [HttpPut("{id}/permissions")]
+    public async Task<IActionResult> UpdateRolePermissions(int id, [FromBody] List<int> permissionIds)
+    {
+        var role = await _context.Roles
+            .Include(r => r.RolePermissions)
+            .FirstOrDefaultAsync(r => r.Id == id);
+            
+        if (role == null) return NotFound();
+
+        _context.RolePermissions.RemoveRange(role.RolePermissions);
+        
+        foreach(var permId in permissionIds)
+        {
+            role.RolePermissions.Add(new RolePermission { RoleId = id, PermissionId = permId });
+        }
+        
         await _context.SaveChangesAsync();
         return Ok();
     }

@@ -38,9 +38,10 @@ function AccessGuard({ moduleName, children }) {
                 const permRes = await fetch(`http://localhost:5005/api/access/userpermissions/${userId}`);
                 if (permRes.ok) {
                     const permissions = await permRes.json();
-                    // Admin might have a specific moduleName = '*' or explicit permissions
+                    // Must have a 'View' (or '*') action for the target module (or '*')
                     const hasPerm = permissions.some(p => 
-                        p.moduleName.toLowerCase() === moduleName.toLowerCase() || p.moduleName === "*"
+                        (p.moduleName.toLowerCase() === moduleName.toLowerCase() || p.moduleName === "*") &&
+                        (p.action.toLowerCase() === "view" || p.action === "*")
                     );
                     setHasAccess(hasPerm);
                 } else {

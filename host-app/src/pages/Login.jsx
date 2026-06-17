@@ -1,23 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import "./Login.css";
 import API_CONFIG from "../config/api";
+import { setToken, getToken } from "../utils/auth";
 
 function Login() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
-  
-  const loginUser = async (e) => {
 
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (getToken()) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
+  const loginUser = async (e) => {
     e.preventDefault();
 
     try {
-
       const response = await axios.post(
         "https://reactmodulefederation-plus-dotnet10.onrender.com/api/auth/login",
         {
@@ -26,12 +31,10 @@ function Login() {
         }
       );
 
-      localStorage.setItem(
-        "token",
-        response.data.token
-      );
+      // Store in cookie instead of localStorage
+      setToken(response.data.token);
 
-      navigate("/dashboard")
+      navigate("/dashboard");
 
     } catch (error) {
       alert("Invalid credentials");
@@ -40,12 +43,10 @@ function Login() {
 
   return (
     <div className="login-container">
-
       <form
         className="login-form"
         onSubmit={loginUser}
       >
-
         <h2>Login</h2>
 
         <input
@@ -69,9 +70,7 @@ function Login() {
         <button type="submit">
           Login
         </button>
-
       </form>
-
     </div>
   );
 }

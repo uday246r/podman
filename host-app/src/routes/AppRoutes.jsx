@@ -123,7 +123,7 @@ function AppRoutes() {
         />
 
         <Route
-          path="/admin/permissions"
+          path="/:role/permissions"
           element={
             <ProtectedRoute>
               <MainLayout>
@@ -136,7 +136,7 @@ function AppRoutes() {
         />
 
         <Route
-          path="/admin/maintenance"
+          path="/:role/maintenance"
           element={
             <ProtectedRoute>
               <MainLayout>
