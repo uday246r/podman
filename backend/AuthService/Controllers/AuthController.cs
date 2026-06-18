@@ -74,14 +74,62 @@ public class AuthController : ControllerBase
             signingCredentials: creds
         );
 
-Console.WriteLine(
-    "......................reached here..........................."
-);
+
         return Ok(new
         {
             token =
                 new JwtSecurityTokenHandler()
                     .WriteToken(token)
+        });
+    }
+
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        {
+            return Unauthorized();
+        }
+
+        var tokenStr = authHeader.Substring("Bearer ".Length).Trim();
+        var handler = new JwtSecurityTokenHandler();
+        
+        if (!handler.CanReadToken(tokenStr))
+        {
+            return Unauthorized();
+        }
+
+        var jwtToken = handler.ReadJwtToken(tokenStr);
+        var emailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(emailClaim))
+        {
+            return Unauthorized();
+        }
+
+        var user = _context.Users.FirstOrDefault(u => u.Email == emailClaim);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var userRole = _context.UserRoles.FirstOrDefault(ur => ur.UserId == user.Id);
+        var roleName = "admin"; // default fallback
+        if (userRole != null)
+        {
+            var role = _context.Roles.FirstOrDefault(r => r.Id == userRole.RoleId);
+            if (role != null)
+            {
+                roleName = role.Name;
+            }
+        }
+
+        return Ok(new
+        {
+            id = user.Id,
+            email = user.Email,
+            role = roleName
         });
     }
 }

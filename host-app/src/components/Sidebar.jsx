@@ -1,12 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Sidebar.css";
-import { removeToken } from "../utils/auth";
-
-const getUserIdFromToken = () => {
-    // Dummy decoder for demo
-    return 2;
-};
+import { removeToken, getCurrentUser } from "../utils/auth";
 
 function Sidebar() {
   const location = useLocation();
@@ -15,7 +10,9 @@ function Sidebar() {
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
-        const userId = getUserIdFromToken();
+        const user = await getCurrentUser();
+        if (!user) return;
+        const userId = user.id;
         const res = await fetch(`http://localhost:5005/api/access/userpermissions/${userId}`);
         if (res.ok) {
           const data = await res.json();

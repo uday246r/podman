@@ -24,6 +24,13 @@ public class ApplicationDbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Auto-generate Guids
+        modelBuilder.Entity<User>().Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<Role>().Property(r => r.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<Permission>().Property(p => p.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<ModuleStatus>().Property(m => m.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<AuditLog>().Property(a => a.Id).HasDefaultValueSql("gen_random_uuid()");
+
         // Composite Keys
         modelBuilder.Entity<RolePermission>()
             .HasKey(rp => new { rp.RoleId, rp.PermissionId });

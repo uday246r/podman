@@ -16,7 +16,7 @@ public class AccessController : ControllerBase
     }
 
     [HttpGet("UserPermissions/{userId}")]
-    public async Task<IActionResult> GetUserPermissions(int userId)
+    public async Task<IActionResult> GetUserPermissions(Guid userId)
     {
         var roleIds = await _context.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -33,7 +33,7 @@ public class AccessController : ControllerBase
     }
 
     [HttpGet("UserRoleName/{userId}")]
-    public async Task<IActionResult> GetUserRoleName(int userId)
+    public async Task<IActionResult> GetUserRoleName(Guid userId)
     {
         var roleName = await _context.UserRoles
             .Where(ur => ur.UserId == userId)

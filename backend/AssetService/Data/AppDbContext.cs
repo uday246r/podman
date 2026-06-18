@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         modelBuilder.Entity<Asset>(entity =>
         {
+            entity.Property(a => a.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(a => a.AssetName).HasMaxLength(120).IsRequired();
             entity.Property(a => a.Category).HasMaxLength(80).IsRequired();
             entity.Property(a => a.Brand).HasMaxLength(80).IsRequired();
@@ -20,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<Assignment>(entity =>
         {
+            entity.Property(a => a.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.HasOne(a => a.Asset)
                 .WithMany(a => a.Assignments)
                 .HasForeignKey(a => a.AssetId)

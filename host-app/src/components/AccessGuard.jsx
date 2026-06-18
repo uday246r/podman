@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-
-// A dummy decoder for demonstration (since actual JWT decoding needs a library like jwt-decode)
-const getUserIdFromToken = () => {
-    // In a real app, parse the JWT token from localStorage.
-    // Here we'll just hardcode userId = 1 for the admin.
-    return 2;
-};
+import { getCurrentUser } from "../utils/auth";
 
 function AccessGuard({ moduleName, children }) {
     const [loading, setLoading] = useState(true);
@@ -15,6 +9,10 @@ function AccessGuard({ moduleName, children }) {
     const [hasAccess, setHasAccess] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
+        setIsMaintenance(false);
+        setHasAccess(false);
+        setMaintenanceMsg("");
 
         const checkAccess = async () => {
             try {
@@ -34,7 +32,13 @@ function AccessGuard({ moduleName, children }) {
 
 
                 // 2. Check Permissions
-                const userId = getUserIdFromToken();
+                const user = await getCurrentUser();
+                if (!user) {
+                    setHasAccess(false);
+                    setLoading(false);
+                    return;
+                }
+                const userId = user.id;
                 const permRes = await fetch(`http://localhost:5005/api/access/userpermissions/${userId}`);
                 if (permRes.ok) {
                     const permissions = await permRes.json();

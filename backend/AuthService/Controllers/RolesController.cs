@@ -42,7 +42,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateRole(int id, [FromBody] Role role)
+    public async Task<IActionResult> UpdateRole(Guid id, [FromBody] Role role)
     {
         if (id != role.Id) return BadRequest();
         _context.Entry(role).State = EntityState.Modified;
@@ -51,7 +51,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteRole(int id)
+    public async Task<IActionResult> DeleteRole(Guid id)
     {
         var role = await _context.Roles.FindAsync(id);
         if (role == null) return NotFound();
@@ -61,7 +61,7 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("{id}/permissions")]
-    public async Task<IActionResult> UpdateRolePermissions(int id, [FromBody] List<int> permissionIds)
+    public async Task<IActionResult> UpdateRolePermissions(Guid id, [FromBody] List<Guid> permissionIds)
     {
         var role = await _context.Roles
             .Include(r => r.RolePermissions)

@@ -20,6 +20,15 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Ticket>()
+            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<TicketComment>()
+            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<TicketHistory>()
+            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder.Entity<Ticket>()
             .Property(t => t.Status)
             .HasConversion<string>();
 

@@ -59,23 +59,44 @@ using (var scope = app.Services.CreateScope())
 
         var adminModuleView = new AuthService.Models.Permission { ModuleName = "AdminModule", Action = "View" };
         var employeeModuleView = new AuthService.Models.Permission { ModuleName = "EmployeeModule", Action = "View" };
-        var employeeModuleCreate = new AuthService.Models.Permission { ModuleName = "EmployeeModule", Action = "Create" };
+        var inventoryModuleView = new AuthService.Models.Permission { ModuleName = "InventoryModule", Action = "View" };
+        var helpdeskModuleView = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "View" };
+        var assetModuleView = new AuthService.Models.Permission { ModuleName = "AssetModule", Action = "View" };
+        var maintenanceModuleView = new AuthService.Models.Permission { ModuleName = "MaintenanceModule", Action = "View" };
+        var permissionModuleView = new AuthService.Models.Permission { ModuleName = "PermissionModule", Action = "View" };
+
+
         
-        db.Permissions.AddRange(adminModuleView, employeeModuleView, employeeModuleCreate);
+        db.Permissions.AddRange(adminModuleView, employeeModuleView, inventoryModuleView, helpdeskModuleView, assetModuleView, permissionModuleView, maintenanceModuleView);
         db.SaveChanges();
 
         db.RolePermissions.AddRange(
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = adminModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = employeeModuleView.Id },
-            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = employeeModuleCreate.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = inventoryModuleView.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleView.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = assetModuleView.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = maintenanceModuleView.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = permissionModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = employeeRole.Id, PermissionId = employeeModuleView.Id }
         );
+
+        db.ModuleStatuses.AddRange(
+            new AuthService.Models.ModuleStatus { ModuleName="AdminModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="EmployeeModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="InventoryModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="AssetModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="HelpdeskModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="MaintenanceModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" },
+            new AuthService.Models.ModuleStatus { ModuleName="PermissionModule" , IsEnabled=true, MaintenanceMessage="Module Under Maintenance" }
+        );
+
         db.SaveChanges();
     }
 
     if (!db.Users.Any())
     {
-        var adminUser = new AuthService.Models.User { Email = "admin@gmail.com", Password = "password" };
+        var adminUser = new AuthService.Models.User { Email = "admin@gmail.com", Password = "pass" };
         db.Users.Add(adminUser);
         db.SaveChanges();
 

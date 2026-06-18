@@ -40,7 +40,7 @@ public class PermissionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePermission(int id, [FromBody] Permission permission)
+    public async Task<IActionResult> UpdatePermission(Guid id, [FromBody] Permission permission)
     {
         if (id != permission.Id) return BadRequest();
         _context.Entry(permission).State = EntityState.Modified;
@@ -49,7 +49,7 @@ public class PermissionsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePermission(int id)
+    public async Task<IActionResult> DeletePermission(Guid id)
     {
         var perm = await _context.Permissions.FindAsync(id);
         if (perm == null) return NotFound();
@@ -86,7 +86,7 @@ public class PermissionsController : ControllerBase
 
 public class ToggleRequest
 {
-    public int RoleId { get; set; }
-    public int PermissionId { get; set; }
+    public Guid RoleId { get; set; }
+    public Guid PermissionId { get; set; }
     public bool IsAssigned { get; set; }
 }

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "concurrently --kill-others \"vite build --watch\" \"vite preview --port 5003 --strictPort --host 0.0.0.0\"",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^8.2.2",
     "vite": "^6.0.7"
   }
 }

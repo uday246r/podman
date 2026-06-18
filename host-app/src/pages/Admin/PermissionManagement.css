@@ -139,7 +139,7 @@
   background: #f8fafc;
 }
 
-.save-permissions-btn {
+.save-s-btn {
   background: #4f46e5;
   color: white;
   border: none;
@@ -149,11 +149,11 @@
   cursor: pointer;
 }
 
-.save-permissions-btn:hover {
+.save-s-btn:hover {
   background: #4338ca;
 }
 
-.save-permissions-btn:disabled {
+.save-s-btn:disabled {
   background: #94a3b8;
   cursor: not-allowed;
 }
@@ -327,13 +327,13 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
-.permission-list {
+.-list {
   margin-top: 20px;
   overflow-y: auto;
   flex: 1;
 }
 
-.permission-list-item {
+.-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -341,11 +341,11 @@ input:checked + .slider:before {
   border-bottom: 1px solid #f1f5f9;
 }
 
-.permission-list-item:last-child {
+.-list-item:last-child {
   border-bottom: none;
 }
 
-.permission-list-item span {
+.-list-item span {
   font-size: 14px;
   color: #334155;
 }

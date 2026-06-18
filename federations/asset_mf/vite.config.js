@@ -58,12 +58,12 @@ export default defineConfig({
   ],
 
   server: {
-    port: 5173,
+    port: 5003,
     cors: true,
   },
 
   preview: {
-    port: 5001,
+    port: 5003,
     strictPort: true,
     cors: true,
   },

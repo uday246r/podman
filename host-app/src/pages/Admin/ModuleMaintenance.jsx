@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from "react";
 import "./ModuleMaintenance.css";
-
-const getUserIdFromToken = () => {
-    // Dummy decoder for demo
-    return 2;
-};
+import { getCurrentUser } from "../../utils/auth";
 
 function ModuleMaintenance() {
     const [statuses, setStatuses] = useState([]);
-    const [permissions, setPermissions] = useState([]);
+    const [s, sets] = useState([]);
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [selectedModule, setSelectedModule] = useState("");
     const [maintenanceMessage, setMaintenanceMessage] = useState("Under maintenance");
 
     useEffect(() => {
         fetchData();
-        fetchPermissions();
+        fetchs();
     }, []);
 
     const fetchData = async () => {
@@ -28,24 +24,27 @@ function ModuleMaintenance() {
         }
     };
 
-    const fetchPermissions = async () => {
+    const fetchs = async () => {
         try {
-            const userId = getUserIdFromToken();
+            const user = await getCurrentUser();
+            if (!user) return;
+            const userId = user.id;
             const res = await fetch(`http://localhost:5005/api/access/userpermissions/${userId}`);
             if (res.ok) {
                 const data = await res.json();
-                setPermissions(data);
+                sets(data);
             }
         } catch (err) {
-            console.error("Failed to fetch permissions:", err);
+            console.error("Failed to fetch s:", err);
         }
     };
 
     const canToggleModule = (targetModuleName) => {
-        // A user can toggle a module if they have a permission under "ModuleMaintenance" 
+        // A user can toggle a module if they have a  under "ModuleMaintenance" 
         // with the action equal to the target module's name (e.g. "HelpdeskModule"), or "*"
-        return permissions.some(p => {
-            const matchesModule = p.moduleName.toLowerCase() === "modulemaintenance" || p.moduleName === "*";
+        return s.some(p => {
+            const mod = p.moduleName.toLowerCase();
+            const matchesModule = mod === "maintenancemodule" || p.moduleName === "*";
             const matchesAction = p.action.toLowerCase() === targetModuleName.toLowerCase() || p.action === "*";
             return matchesModule && matchesAction;
         });
@@ -125,7 +124,7 @@ function ModuleMaintenance() {
                                         {status.isEnabled ? "None" : status.maintenanceMessage}
                                     </td>
                                     <td>
-                                        <label className={`switch ${!hasAccess ? 'disabled' : ''}`} title={!hasAccess ? "You do not have permission to toggle this module" : ""}>
+                                        <label className={`switch ${!hasAccess ? 'disabled' : ''}`} title={!hasAccess ? "You do not have  to toggle this module" : ""}>
                                             <input 
                                                 type="checkbox" 
                                                 checked={status.isEnabled}

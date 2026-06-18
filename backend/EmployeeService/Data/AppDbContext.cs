@@ -11,4 +11,10 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Employee> Employees => Set<Employee>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Employee>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+    }
 }

@@ -97,7 +97,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <AccessGuard moduleName="AssetsModule">
+                <AccessGuard moduleName="AssetModule">
                   <Suspense fallback={<h2>Loading...</h2>}>
                     <AssetApp />
                   </Suspense>
@@ -127,7 +127,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <AccessGuard moduleName="PermissionManagement">
+                <AccessGuard moduleName="PermissionModule">
                   <PermissionManagement />
                 </AccessGuard>
               </MainLayout>
@@ -140,7 +140,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <AccessGuard moduleName="ModuleMaintenance">
+                <AccessGuard moduleName="MaintenanceModule">
                   <ModuleMaintenance />
                 </AccessGuard>
               </MainLayout>
