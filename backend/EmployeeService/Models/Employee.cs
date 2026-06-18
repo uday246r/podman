@@ -12,7 +12,7 @@ public class Employee
 
     public decimal Salary { get; set; }
 
-    public int RoleId { get; set; }
+    public Guid RoleId { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

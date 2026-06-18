@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createUser } from "../services/authService";
+import { createUser, deleteUser, getCurrentUser, getUserPermissions, verifyBackendPermission } from "../services/authService";
 import EmployeeTable from "../components/EmployeeTable";
 import EmployeeModal from "../components/EmployeeModal";
 import {
@@ -14,6 +14,10 @@ function Dashboard() {
   const [employees, setEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  
+  const [canCreate, setCanCreate] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
 
   const loadEmployees = async () => {
     try {
@@ -24,8 +28,30 @@ function Dashboard() {
     }
   };
 
+  const loadPermissions = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) return;
+      
+      const permissions = await getUserPermissions(user.id);
+      
+      // Look for permissions under EmployeeModule
+      const employeePerms = permissions.filter(p => p.moduleName.toLowerCase() === "employeemodule" || p.moduleName === "*");
+      
+      const hasWildcardAction = employeePerms.some(p => p.action === "*");
+      
+      setCanCreate(hasWildcardAction || employeePerms.some(p => p.action.toLowerCase() === "create_employee"));
+      setCanEdit(hasWildcardAction || employeePerms.some(p => p.action.toLowerCase() === "edit_employee"));
+      setCanDelete(hasWildcardAction || employeePerms.some(p => p.action.toLowerCase() === "delete_employee"));
+      
+    } catch (error) {
+      console.error("Failed to load permissions:", error);
+    }
+  };
+
   useEffect(() => {
     loadEmployees();
+    loadPermissions();
   }, []);
 
   const handleCreate = () => {
@@ -40,6 +66,18 @@ function Dashboard() {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
+      const user = await getCurrentUser();
+      if (!user) {
+        alert("Authentication required.");
+        return;
+      }
+      
+      const hasPermission = await verifyBackendPermission(user.id, "EmployeeModule", "delete_employee");
+      if (!hasPermission) {
+        alert("Backend Verification Failed: You do not have permission to delete employees.");
+        return;
+      }
+      
       await deleteEmployee(id);
       loadEmployees();
     }
@@ -47,17 +85,44 @@ function Dashboard() {
 
   const handleSubmit = async (payload) => {
     try {
+      const user = await getCurrentUser();
+      if (!user) {
+        alert("Authentication required.");
+        return;
+      }
+
       if (selectedEmployee) {
+        const hasPermission = await verifyBackendPermission(user.id, "EmployeeModule", "edit_employee");
+        if (!hasPermission) {
+          alert("Backend Verification Failed: You do not have permission to edit employees.");
+          return;
+        }
         await updateEmployee(selectedEmployee.id, payload);
       } else {
+        const hasPermission = await verifyBackendPermission(user.id, "EmployeeModule", "create_employee");
+        if (!hasPermission) {
+          alert("Backend Verification Failed: You do not have permission to create employees.");
+          return;
+        }
+
         // First create user in Auth Service
-        await createUser({
+        const userRes = await createUser({
           email: payload.email,
           password: "Password@123", // Default password
           roleId: payload.roleId
         });
-        // Then create employee in Employee Service
-        await createEmployee(payload);
+        
+        try {
+          // Then create employee in Employee Service
+          await createEmployee(payload);
+        } catch (employeeError) {
+          // Compensating transaction: roll back user creation if employee creation fails
+          if (userRes && userRes.userId) {
+            console.warn("Employee creation failed, rolling back user creation...");
+            await deleteUser(userRes.userId);
+          }
+          throw employeeError;
+        }
       }
       setIsModalOpen(false);
       loadEmployees();
@@ -75,13 +140,15 @@ function Dashboard() {
             <h1>Team Directory</h1>
             <p>Manage your team members, departments, and compensation</p>
           </div>
-          <button className="create-btn" onClick={handleCreate}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add Member
-          </button>
+          {canCreate && (
+            <button className="create-btn" onClick={handleCreate}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Member
+            </button>
+          )}
         </div>
 
         <div className="metrics-overview">
@@ -116,6 +183,8 @@ function Dashboard() {
             employees={employees}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            canEdit={canEdit}
+            canDelete={canDelete}
           />
         ) : (
           <div className="empty-state">

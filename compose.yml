@@ -43,6 +43,7 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      AuthApiUrl: http://auth-api:8080
       ConnectionStrings__DefaultConnection: Host=ep-lively-sunset-applrdrk.c-7.us-east-1.aws.neon.tech;Port=5432;Database=employeeManagement;Username=neondb_owner;Password=npg_Teco3MhA7UbE;SSL Mode=Require;Trust Server Certificate=true
     ports:
       - "8081:8081"

@@ -27,40 +27,10 @@ export const setCurrentUser = (username, role) => {
 };
 
 export const getAuthToken = async () => {
-  const cached = localStorage.getItem('helpdesk_token');
-  const user = getCurrentUser();
-  
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-      if (parsed.username === user.username && parsed.role === user.role) {
-        if (!isTokenExpired(parsed.token)) {
-          return parsed.token;
-        }
-      }
-    } catch {
-      localStorage.removeItem('helpdesk_token');
-    }
-  }
-
-  try {
-    const res = await fetch(`${BASE_URL}/auth/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user.username, role: user.role }),
-    });
-    if (!res.ok) throw new Error('Auth failed');
-    const data = await res.json();
-    localStorage.setItem('helpdesk_token', JSON.stringify({
-      username: user.username,
-      role: user.role,
-      token: data.token,
-    }));
-    return data.token;
-  } catch (err) {
-    console.error('Failed to retrieve authentication token', err);
-    return null;
-  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; token=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
 };
 
 const getHeaders = async () => {

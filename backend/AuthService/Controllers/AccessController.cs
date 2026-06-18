@@ -42,4 +42,21 @@ public class AccessController : ControllerBase
 
         return Ok(new { roleName = roleName ?? "admin" });
     }
+
+    [HttpGet("CheckPermission")]
+    public async Task<IActionResult> CheckPermission([FromQuery] Guid userId, [FromQuery] string moduleName, [FromQuery] string action)
+    {
+        var roleIds = await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync();
+
+        var hasPermission = await _context.RolePermissions
+            .Where(rp => roleIds.Contains(rp.RoleId))
+            .AnyAsync(rp => 
+                (rp.Permission.ModuleName.ToLower() == moduleName.ToLower() || rp.Permission.ModuleName == "*") &&
+                (rp.Permission.Action.ToLower() == action.ToLower() || rp.Permission.Action == "*"));
+
+        return Ok(new { hasPermission });
+    }
 }
