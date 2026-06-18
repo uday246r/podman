@@ -1,6 +1,7 @@
 import { getAuthToken } from './api';
 
-const AUTH_API = import.meta.env.VITE_AUTH_API || "http://localhost:5005";
+const AUTH_API = import.meta.env.VITE_AUTH_API || '/api';
+console.log(AUTH_API);
 
 export const getCurrentUser = async () => {
     const token = await getAuthToken();
