@@ -11,10 +11,10 @@ export default defineConfig(({ mode }) => {
       federation({
         name: "host",
         remotes: {
-          employee_mf: env.VITE_EMPLOYEE_MF_URL || "https://employeesfederation.onrender.com/assets/remoteEntry.js",
-          asset_management: env.VITE_ASSET_MF_URL || "https://assetmanagementsystem-0sqh.onrender.com/assets/remoteEntry.js",
-          helpdesk: env.VITE_HELPDESK_MF_URL || "https://helpdesk-frontend-45xw.onrender.com/assets/remoteEntry.js",
-          inventory: env.VITE_INVENTORY_MF_URL || "https://inventorymanagement-rm.onrender.com/assets/remoteEntry.js"
+          employee_mf: env.VITE_EMPLOYEE_MF_URL,
+          asset_management: env.VITE_ASSET_MF_URL,
+          helpdesk: env.VITE_HELPDESK_MF_URL,
+          inventory: env.VITE_INVENTORY_MF_URL
         },
         shared: {
           react: {

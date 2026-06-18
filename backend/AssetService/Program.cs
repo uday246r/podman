@@ -39,7 +39,8 @@ builder.Services.AddCors(options =>
 // Register HttpClient for AuthServiceClient
 builder.Services.AddHttpClient("AuthServiceClient", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5005"); // Assume AuthService runs here
+    var authApiUrl = builder.Configuration["AuthApiUrl"] ?? "http://localhost:5005";
+    client.BaseAddress = new Uri(authApiUrl); // Assume AuthService runs here
 });
 
 var app = builder.Build();

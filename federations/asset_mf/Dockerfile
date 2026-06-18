@@ -2,17 +2,14 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# Enable pnpm via corepack
-RUN corepack enable pnpm
-
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
-RUN pnpm install
+COPY package*.json ./
+RUN npm ci
 
 COPY . .
-RUN pnpm run build
+RUN npm run build
 
 FROM nginx:1.29-alpine
 RUN rm -rf /usr/share/nginx/html/*

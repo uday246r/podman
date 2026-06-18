@@ -4,19 +4,19 @@ services:
   # ==========================================
   # Database Container (Shared by all APIs)
   # ==========================================
-  postgres-db:
-    image: postgres:17-alpine
-    container_name: postgres-db
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-employeeManagement}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-db-data:/var/lib/postgresql/data
-      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+  # postgres-db:
+  #   image: postgres:17-alpine
+  #   container_name: postgres-db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  #     POSTGRES_DB: ${POSTGRES_DB:-employeeManagement}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-db-data:/var/lib/postgresql/data
+  #     - ./postgres-init:/docker-entrypoint-initdb.d:ro
 
   # ==========================================
   # Backend API Services
@@ -58,11 +58,12 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=asset_management_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      AuthApiUrl: http://auth-api:8080
+      ConnectionStrings__DefaultConnection: Host=ep-purple-boat-ah63t0v8-pooler.c-3.us-east-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_n5tFelTCX4Do;SSL Mode=Require;Trust Server Certificate=true
     ports:
       - "5088:10000"
-    depends_on:
-      - postgres-db
+    # depends_on:
+    #   - postgres-db
 
   helpdesk-api:
     build:
@@ -72,12 +73,13 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=HelpdeskDB;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      AuthApiUrl: http://auth-api:8080
+      ConnectionStrings__DefaultConnection: Host=ep-quiet-butterfly-atwzo5pp.c-9.us-east-1.aws.neon.tech;Port=5432;Database=helpdeskService;Username=neondb_owner;Password=npg_1icBlxKRXt9b;SSL Mode=Require;Trust Server Certificate=true
       ApplyMigrationsOnStartup: "true"
     ports:
       - "5007:8080"
-    depends_on:
-      - postgres-db
+    # depends_on:
+    #   - postgres-db
 
   inventory-api:
     build:
@@ -87,11 +89,11 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=postgres-db;Port=5432;Database=inventorydb;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__DefaultConnection: Host=ep-gentle-pine-aibejfz2-pooler.c-4.us-east-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_GRwZlaCd64rP;SSL Mode=Require;Trust Server Certificate=true
     ports:
       - "5267:8080"
-    depends_on:
-      - postgres-db
+    # depends_on:
+    #   - postgres-db
 
   # ==========================================
   # Frontend Micro-Frontend Services
@@ -157,12 +159,12 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5007/api}
-        - VITE_AUTH_API=${VITE_AUTH_API:-http://${HOST_IP:-localhost}:5005}
+        - VITE_AUTH_API=${VITE_AUTH_API:-http://${HOST_IP:-localhost}:5005/api}
     container_name: helpdesk-mf
     restart: always
     ports:
       - "5004:80"
 
-volumes:
-  postgres-db-data:
+# volumes:
+#   postgres-db-data:
 
