@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api.js';
+import { getCurrentUser, getUserPermissions, verifyBackendPermission } from '../services/authService';
 import { Eye, Edit2, Trash2, Plus, Search } from 'lucide-react';
 
 export const TicketList = () => {
@@ -12,6 +13,11 @@ export const TicketList = () => {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [assignedFilter, setAssignedFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [canCreate, setCanCreate] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
+  const [canViewTicket, setCanViewTicket] = useState(false);
 
   const fetchTickets = () => {
     setLoading(true);
@@ -31,15 +37,56 @@ export const TicketList = () => {
   };
 
   useEffect(() => {
-    fetchTickets();
+    loadPermissions().then(canView => {
+      if (canView) {
+        fetchTickets();
+      } else {
+        setLoading(false);
+        setError("You do not have permission to view tickets (Missing view_ticket permission).");
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, priorityFilter, assignedFilter]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm(`Are you sure you want to delete ticket #${id}?`)) {
+  const loadPermissions = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) return false;
+      
+      const permissions = await getUserPermissions(user.id);
+      const helpdeskPerms = permissions.filter(p => p.moduleName.toLowerCase() === "helpdeskmodule" || p.moduleName === "*");
+      const hasWildcard = helpdeskPerms.some(p => p.action === "*");
+      
+      setCanCreate(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "create_ticket"));
+      setCanEdit(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "edit_ticket"));
+      setCanDelete(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "delete_ticket"));
+
+      const canView = hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "view_ticket");
+      setCanViewTicket(canView);
+      return canView;
+    } catch (error) {
+      console.error("Failed to load permissions:", error);
+      return false;
+    }
+  };
+
+  const handleDelete = async (guid) => {
+    if (window.confirm(`Are you sure you want to delete ticket #${guid}?`)) {
       try {
-        await api.deleteTicket(id);
-        setTickets(tickets.filter(t => t.id !== id));
+        const user = await getCurrentUser();
+        if (!user) {
+          alert("Authentication required.");
+          return;
+        }
+        
+        const hasPermission = await verifyBackendPermission(user.id, "HelpdeskModule", "delete_ticket");
+        if (!hasPermission) {
+          alert("Backend Verification Failed: You do not have permission to delete tickets.");
+          return;
+        }
+
+        await api.deleteTicket(guid);
+        setTickets(tickets.filter(t => t.guid !== guid));
       } catch (err) {
         alert(err.message || 'Failed to delete ticket.');
       }
@@ -58,9 +105,11 @@ export const TicketList = () => {
           <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>Support Tickets</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage, filter, and audit helpdesk requests.</p>
         </div>
-        <Link to="../create" className="btn btn-primary">
-          <Plus size={18} /> Create Ticket
-        </Link>
+        {canCreate && (
+          <Link to="../create" className="btn btn-primary">
+            <Plus size={18} /> Create Ticket
+          </Link>
+        )}
       </div>
 
       {/* Filters Area */}
@@ -143,8 +192,8 @@ export const TicketList = () => {
               </thead>
               <tbody>
                 {filteredTickets.map(t => (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--border-light)', transition: 'var(--transition-fast)' }}>
-                    <td style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--text-muted)' }}>#{t.id}</td>
+                  <tr key={t.guid} style={{ borderBottom: '1px solid var(--border-light)', transition: 'var(--transition-fast)' }}>
+                    <td style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--text-muted)' }}>#{t.guid}</td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{t.title}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Category: {t.category}</div>
@@ -161,17 +210,21 @@ export const TicketList = () => {
                     <td style={{ padding: '16px 24px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t.createdBy}</td>
                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
-                        <Link to={`../ticket/${t.id}`} className="btn btn-secondary" style={{ padding: '8px 12px' }} title="View details">
+                        <Link to={`../ticket/${t.guid}`} className="btn btn-secondary" style={{ padding: '8px 12px' }} title="View details">
                           <Eye size={16} />
                         </Link>
                         
-                        <Link to={`../update/${t.id}`} className="btn btn-secondary" style={{ padding: '8px 12px', borderColor: 'var(--border-glow)' }} title="Edit ticket">
-                          <Edit2 size={16} style={{ color: 'var(--primary)' }} />
-                        </Link>
+                        {canEdit && (
+                          <Link to={`../update/${t.guid}`} className="btn btn-secondary" style={{ padding: '8px 12px', borderColor: 'var(--border-glow)' }} title="Edit ticket">
+                            <Edit2 size={16} style={{ color: 'var(--primary)' }} />
+                          </Link>
+                        )}
 
-                        <button onClick={() => handleDelete(t.id)} className="btn btn-secondary" style={{ padding: '8px 12px' }} title="Delete ticket">
-                          <Trash2 size={16} style={{ color: 'var(--danger)' }} />
-                        </button>
+                        {canDelete && (
+                          <button onClick={() => handleDelete(t.guid)} className="btn btn-secondary" style={{ padding: '8px 12px' }} title="Delete ticket">
+                            <Trash2 size={16} style={{ color: 'var(--danger)' }} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

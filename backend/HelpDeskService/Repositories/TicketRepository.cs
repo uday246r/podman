@@ -38,9 +38,9 @@ public class TicketRepository : ITicketRepository
         return await query.ToListAsync();
     }
 
-    public async Task<Ticket?> GetByIdAsync(int id)
+    public async Task<Ticket?> GetByIdAsync(Guid guid)
     {
-        return await _context.Tickets.FindAsync(id);
+        return await _context.Tickets.FindAsync(guid);
     }
 
     public async Task AddAsync(Ticket ticket)
@@ -62,10 +62,10 @@ public class TicketRepository : ITicketRepository
     }
 
     // Comments & History implementation
-    public async Task<IEnumerable<TicketComment>> GetCommentsAsync(int ticketId)
+    public async Task<IEnumerable<TicketComment>> GetCommentsAsync(Guid ticketGuid)
     {
         return await _context.TicketComments
-            .Where(tc => tc.TicketId == ticketId)
+            .Where(tc => tc.TicketGuid == ticketGuid)
             .OrderByDescending(tc => tc.CreatedAt)
             .ToListAsync();
     }
@@ -76,10 +76,10 @@ public class TicketRepository : ITicketRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<TicketHistory>> GetHistoryAsync(int ticketId)
+    public async Task<IEnumerable<TicketHistory>> GetHistoryAsync(Guid ticketGuid)
     {
         return await _context.TicketHistories
-            .Where(th => th.TicketId == ticketId)
+            .Where(th => th.TicketGuid == ticketGuid)
             .OrderByDescending(th => th.ChangedAt)
             .ToListAsync();
     }

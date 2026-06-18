@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://helpdesk-n6cw.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5007/api";
 
 const isTokenExpired = (token) => {
   if (!token) return true;
@@ -79,8 +79,8 @@ export const api = {
     return request(`/ticket?${params.toString()}`);
   },
 
-  getTicket: async (id) => {
-    return request(`/ticket/${id}`);
+  getTicket: async (guid) => {
+    return request(`/ticket/${guid}`);
   },
 
   createTicket: async (ticket) => {
@@ -90,45 +90,45 @@ export const api = {
     });
   },
 
-  updateTicket: async (id, ticket) => {
-    return request(`/ticket/${id}`, {
+  updateTicket: async (guid, ticket) => {
+    return request(`/ticket/${guid}`, {
       method: 'PUT',
       body: JSON.stringify(ticket),
     });
   },
 
-  deleteTicket: async (id) => {
-    return request(`/ticket/${id}`, {
+  deleteTicket: async (guid) => {
+    return request(`/ticket/${guid}`, {
       method: 'DELETE',
     });
   },
 
-  updateStatus: async (id, status) => {
-    return request(`/ticket/${id}/status`, {
+  updateStatus: async (guid, status) => {
+    return request(`/ticket/${guid}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
   },
 
-  assignTicket: async (id, assignedTo) => {
-    return request(`/ticket/${id}/assign`, {
+  assignTicket: async (guid, assignedTo) => {
+    return request(`/ticket/${guid}/assign`, {
       method: 'PATCH',
       body: JSON.stringify({ assignedTo }),
     });
   },
 
-  addComment: async (ticketId, commentText) => {
-    return request(`/ticket/${ticketId}/comments`, {
+  addComment: async (guid, commentText) => {
+    return request(`/ticket/${guid}/comments`, {
       method: 'POST',
       body: JSON.stringify({ commentText }),
     });
   },
 
-  getComments: async (ticketId) => {
-    return request(`/ticket/${ticketId}/comments`);
+  getComments: async (guid) => {
+    return request(`/ticket/${guid}/comments`);
   },
 
-  getHistory: async (ticketId) => {
-    return request(`/ticket/${ticketId}/history`);
+  getHistory: async (guid) => {
+    return request(`/ticket/${guid}/history`);
   },
 };

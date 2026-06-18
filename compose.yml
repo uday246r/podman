@@ -157,6 +157,7 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-http://${HOST_IP:-localhost}:5007/api}
+        - VITE_AUTH_API=${VITE_AUTH_API:-http://${HOST_IP:-localhost}:5005}
     container_name: helpdesk-mf
     restart: always
     ports:

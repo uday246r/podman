@@ -24,9 +24,9 @@ namespace HelpdeskService.Migrations
 
             modelBuilder.Entity("HelpdeskService.Models.Ticket", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("AssignedTo")
@@ -62,16 +62,16 @@ namespace HelpdeskService.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.HasKey("Guid");
 
                     b.ToTable("Tickets");
                 });
 
             modelBuilder.Entity("HelpdeskService.Models.TicketComment", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("CommentText")
@@ -85,21 +85,21 @@ namespace HelpdeskService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TicketId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TicketGuid")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.HasKey("Guid");
 
-                    b.HasIndex("TicketId");
+                    b.HasIndex("TicketGuid");
 
                     b.ToTable("TicketComments");
                 });
 
             modelBuilder.Entity("HelpdeskService.Models.TicketHistory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("ChangedAt")
@@ -121,12 +121,12 @@ namespace HelpdeskService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TicketId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TicketGuid")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.HasKey("Guid");
 
-                    b.HasIndex("TicketId");
+                    b.HasIndex("TicketGuid");
 
                     b.ToTable("TicketHistories");
                 });
@@ -135,7 +135,7 @@ namespace HelpdeskService.Migrations
                 {
                     b.HasOne("HelpdeskService.Models.Ticket", "Ticket")
                         .WithMany()
-                        .HasForeignKey("TicketId")
+                        .HasForeignKey("TicketGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -146,7 +146,7 @@ namespace HelpdeskService.Migrations
                 {
                     b.HasOne("HelpdeskService.Models.Ticket", "Ticket")
                         .WithMany()
-                        .HasForeignKey("TicketId")
+                        .HasForeignKey("TicketGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

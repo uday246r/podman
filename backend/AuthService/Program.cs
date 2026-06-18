@@ -61,13 +61,24 @@ using (var scope = app.Services.CreateScope())
         var employeeModuleView = new AuthService.Models.Permission { ModuleName = "EmployeeModule", Action = "View" };
         var inventoryModuleView = new AuthService.Models.Permission { ModuleName = "InventoryModule", Action = "View" };
         var helpdeskModuleView = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "View" };
+        var helpdeskModuleViewTicket = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "view_ticket" };
+        var helpdeskModuleCreateTicket = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "create_ticket" };
+        var helpdeskModuleEditTicket = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "edit_ticket" };
+        var helpdeskModuleDeleteTicket = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "delete_ticket" };
+        var helpdeskModuleUpdateStatus = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "update_ticket_status" };
+        var helpdeskModuleAssign = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "assign_ticket" };
+        var helpdeskModuleComment = new AuthService.Models.Permission { ModuleName = "HelpdeskModule", Action = "add_ticket_comment" };
         var assetModuleView = new AuthService.Models.Permission { ModuleName = "AssetModule", Action = "View" };
         var maintenanceModuleView = new AuthService.Models.Permission { ModuleName = "MaintenanceModule", Action = "View" };
         var permissionModuleView = new AuthService.Models.Permission { ModuleName = "PermissionModule", Action = "View" };
 
 
         
-        db.Permissions.AddRange(adminModuleView, employeeModuleView, inventoryModuleView, helpdeskModuleView, assetModuleView, permissionModuleView, maintenanceModuleView);
+        db.Permissions.AddRange(
+            adminModuleView, employeeModuleView, inventoryModuleView, helpdeskModuleView, assetModuleView, permissionModuleView, maintenanceModuleView,
+            helpdeskModuleViewTicket, helpdeskModuleCreateTicket, helpdeskModuleEditTicket, helpdeskModuleDeleteTicket,
+            helpdeskModuleUpdateStatus, helpdeskModuleAssign, helpdeskModuleComment
+        );
         db.SaveChanges();
 
         db.RolePermissions.AddRange(
@@ -75,6 +86,13 @@ using (var scope = app.Services.CreateScope())
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = employeeModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = inventoryModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleView.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleViewTicket.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleCreateTicket.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleEditTicket.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleDeleteTicket.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleUpdateStatus.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleAssign.Id },
+            new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = helpdeskModuleComment.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = assetModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = maintenanceModuleView.Id },
             new AuthService.Models.RolePermission { RoleId = adminRole.Id, PermissionId = permissionModuleView.Id },

@@ -23,11 +23,11 @@ public class TicketService : ITicketService
         return tickets.Select(MapToDto);
     }
 
-    public async Task<TicketDto?> GetByIdAsync(int id)
+    public async Task<TicketDto?> GetByIdAsync(Guid guid)
     {
-        var ticket = await _repository.GetByIdAsync(id);
+        var ticket = await _repository.GetByIdAsync(guid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {id} was not found.");
+            throw new NotFoundException($"Ticket with ID {guid} was not found.");
 
         return MapToDto(ticket);
     }
@@ -48,39 +48,39 @@ public class TicketService : ITicketService
         await _repository.AddAsync(ticket);
 
         // Audit ticket creation
-        await LogHistoryAsync(ticket.Id, "Ticket", "", "Created", createdBy);
+        await LogHistoryAsync(ticket.Guid, "Ticket", "", "Created", createdBy);
 
         return MapToDto(ticket);
     }
 
-    public async Task<TicketDto?> UpdateAsync(int id, UpdateTicketDto updateDto, string changedBy)
+    public async Task<TicketDto?> UpdateAsync(Guid guid, UpdateTicketDto updateDto, string changedBy)
     {
-        var ticket = await _repository.GetByIdAsync(id);
+        var ticket = await _repository.GetByIdAsync(guid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {id} was not found.");
+            throw new NotFoundException($"Ticket with ID {guid} was not found.");
 
         // Check and log status change
         if (ticket.Status != updateDto.Status)
         {
             ValidateStatusTransition(ticket.Status, updateDto.Status);
-            await LogHistoryAsync(id, nameof(Ticket.Status), ticket.Status.ToString(), updateDto.Status.ToString(), changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Status), ticket.Status.ToString(), updateDto.Status.ToString(), changedBy);
         }
 
         // Check and log priority change
         if (ticket.Priority != updateDto.Priority)
         {
-            await LogHistoryAsync(id, nameof(Ticket.Priority), ticket.Priority.ToString(), updateDto.Priority.ToString(), changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Priority), ticket.Priority.ToString(), updateDto.Priority.ToString(), changedBy);
         }
 
         // Check other changes
         if (ticket.Title != updateDto.Title)
-            await LogHistoryAsync(id, nameof(Ticket.Title), ticket.Title, updateDto.Title, changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Title), ticket.Title, updateDto.Title, changedBy);
 
         if (ticket.Description != updateDto.Description)
-            await LogHistoryAsync(id, nameof(Ticket.Description), ticket.Description, updateDto.Description, changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Description), ticket.Description, updateDto.Description, changedBy);
 
         if (ticket.Category != updateDto.Category)
-            await LogHistoryAsync(id, nameof(Ticket.Category), ticket.Category, updateDto.Category, changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Category), ticket.Category, updateDto.Category, changedBy);
 
         ticket.Title = updateDto.Title;
         ticket.Description = updateDto.Description;
@@ -93,21 +93,21 @@ public class TicketService : ITicketService
         return MapToDto(ticket);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid guid)
     {
-        var ticket = await _repository.GetByIdAsync(id);
+        var ticket = await _repository.GetByIdAsync(guid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {id} was not found.");
+            throw new NotFoundException($"Ticket with ID {guid} was not found.");
 
         await _repository.DeleteAsync(ticket);
         return true;
     }
 
-    public async Task<TicketDto?> UpdateStatusAsync(int id, TicketStatus status, string changedBy)
+    public async Task<TicketDto?> UpdateStatusAsync(Guid guid, TicketStatus status, string changedBy)
     {
-        var ticket = await _repository.GetByIdAsync(id);
+        var ticket = await _repository.GetByIdAsync(guid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {id} was not found.");
+            throw new NotFoundException($"Ticket with ID {guid} was not found.");
 
         if (ticket.Status != status)
         {
@@ -117,17 +117,17 @@ public class TicketService : ITicketService
             ticket.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdateAsync(ticket);
-            await LogHistoryAsync(id, nameof(Ticket.Status), oldStatus.ToString(), status.ToString(), changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.Status), oldStatus.ToString(), status.ToString(), changedBy);
         }
 
         return MapToDto(ticket);
     }
 
-    public async Task<TicketDto?> AssignAsync(int id, string? assignedTo, string changedBy)
+    public async Task<TicketDto?> AssignAsync(Guid guid, string? assignedTo, string changedBy)
     {
-        var ticket = await _repository.GetByIdAsync(id);
+        var ticket = await _repository.GetByIdAsync(guid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {id} was not found.");
+            throw new NotFoundException($"Ticket with ID {guid} was not found.");
 
         if (ticket.AssignedTo != assignedTo)
         {
@@ -138,22 +138,22 @@ public class TicketService : ITicketService
             ticket.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdateAsync(ticket);
-            await LogHistoryAsync(id, nameof(Ticket.AssignedTo), oldAssigned, newAssigned, changedBy);
+            await LogHistoryAsync(guid, nameof(Ticket.AssignedTo), oldAssigned, newAssigned, changedBy);
         }
 
         return MapToDto(ticket);
     }
 
     // Advanced features implementation
-    public async Task<TicketCommentDto> AddCommentAsync(int ticketId, CreateCommentDto commentDto, string createdBy)
+    public async Task<TicketCommentDto> AddCommentAsync(Guid ticketGuid, CreateCommentDto commentDto, string createdBy)
     {
-        var ticket = await _repository.GetByIdAsync(ticketId);
+        var ticket = await _repository.GetByIdAsync(ticketGuid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {ticketId} was not found.");
+            throw new NotFoundException($"Ticket with ID {ticketGuid} was not found.");
 
         var comment = new TicketComment
         {
-            TicketId = ticketId,
+            TicketGuid = ticketGuid,
             CommentText = commentDto.CommentText,
             CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
@@ -162,46 +162,46 @@ public class TicketService : ITicketService
         await _repository.AddCommentAsync(comment);
 
         // Audit comment creation
-        await LogHistoryAsync(ticketId, "Comment", "", $"Added comment by {createdBy}", createdBy);
+        await LogHistoryAsync(ticketGuid, "Comment", "", $"Added comment by {createdBy}", createdBy);
 
         return new TicketCommentDto
         {
-            Id = comment.Id,
-            TicketId = comment.TicketId,
+            Guid = comment.Guid,
+            TicketGuid = comment.TicketGuid,
             CommentText = comment.CommentText,
             CreatedBy = comment.CreatedBy,
             CreatedAt = comment.CreatedAt
         };
     }
 
-    public async Task<IEnumerable<TicketCommentDto>> GetCommentsAsync(int ticketId)
+    public async Task<IEnumerable<TicketCommentDto>> GetCommentsAsync(Guid ticketGuid)
     {
-        var ticket = await _repository.GetByIdAsync(ticketId);
+        var ticket = await _repository.GetByIdAsync(ticketGuid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {ticketId} was not found.");
+            throw new NotFoundException($"Ticket with ID {ticketGuid} was not found.");
 
-        var comments = await _repository.GetCommentsAsync(ticketId);
+        var comments = await _repository.GetCommentsAsync(ticketGuid);
         return comments.Select(c => new TicketCommentDto
         {
-            Id = c.Id,
-            TicketId = c.TicketId,
+            Guid = c.Guid,
+            TicketGuid = c.TicketGuid,
             CommentText = c.CommentText,
             CreatedBy = c.CreatedBy,
             CreatedAt = c.CreatedAt
         });
     }
 
-    public async Task<IEnumerable<TicketHistoryDto>> GetHistoryAsync(int ticketId)
+    public async Task<IEnumerable<TicketHistoryDto>> GetHistoryAsync(Guid ticketGuid)
     {
-        var ticket = await _repository.GetByIdAsync(ticketId);
+        var ticket = await _repository.GetByIdAsync(ticketGuid);
         if (ticket == null)
-            throw new NotFoundException($"Ticket with ID {ticketId} was not found.");
+            throw new NotFoundException($"Ticket with ID {ticketGuid} was not found.");
 
-        var history = await _repository.GetHistoryAsync(ticketId);
+        var history = await _repository.GetHistoryAsync(ticketGuid);
         return history.Select(h => new TicketHistoryDto
         {
-            Id = h.Id,
-            TicketId = h.TicketId,
+            Guid = h.Guid,
+            TicketGuid = h.TicketGuid,
             FieldName = h.FieldName,
             OldValue = h.OldValue,
             NewValue = h.NewValue,
@@ -210,11 +210,11 @@ public class TicketService : ITicketService
         });
     }
 
-    private async Task LogHistoryAsync(int ticketId, string fieldName, string oldValue, string newValue, string changedBy)
+    private async Task LogHistoryAsync(Guid ticketGuid, string fieldName, string oldValue, string newValue, string changedBy)
     {
         var history = new TicketHistory
         {
-            TicketId = ticketId,
+            TicketGuid = ticketGuid,
             FieldName = fieldName,
             OldValue = oldValue,
             NewValue = newValue,
@@ -247,7 +247,7 @@ public class TicketService : ITicketService
     {
         return new TicketDto
         {
-            Id = ticket.Id,
+            Guid = ticket.Guid,
             Title = ticket.Title,
             Description = ticket.Description,
             Category = ticket.Category,

@@ -4,9 +4,9 @@ import { api } from '../services/api.js';
 import { ArrowLeft, Save } from 'lucide-react';
 
 export const UpdateTicket = () => {
-  const { id } = useParams();
+  const { guid } = useParams();
   const navigate = useNavigate();
-  const ticketId = Number(id);
+  const ticketGuid = guid;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -19,20 +19,41 @@ export const UpdateTicket = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.getTicket(ticketId)
-      .then(t => {
+    const loadAll = async () => {
+      try {
+        const { getCurrentUser, getUserPermissions } = await import('../services/authService');
+        const user = await getCurrentUser();
+        if (!user) {
+          setError("Authentication required.");
+          setLoading(false);
+          return;
+        }
+        
+        const permissions = await getUserPermissions(user.id);
+        const helpdeskPerms = permissions.filter(p => p.moduleName.toLowerCase() === "helpdeskmodule" || p.moduleName === "*");
+        const hasWildcard = helpdeskPerms.some(p => p.action === "*");
+        const canEdit = hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "edit_ticket");
+        
+        if (!canEdit) {
+          setError("You do not have permission to edit tickets.");
+          setLoading(false);
+          return;
+        }
+
+        const t = await api.getTicket(ticketGuid);
         setTitle(t.title);
         setDescription(t.description);
         setCategory(t.category);
         setPriority(t.priority);
         setStatus(t.status);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         setError(err.message || 'Failed to load ticket properties.');
         setLoading(false);
-      });
-  }, [ticketId]);
+      }
+    };
+    loadAll();
+  }, [ticketGuid]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,8 +66,8 @@ export const UpdateTicket = () => {
     setError('');
 
     try {
-      await api.updateTicket(ticketId, { title, description, category, priority, status });
-      navigate(`../ticket/${ticketId}`);
+      await api.updateTicket(ticketGuid, { title, description, category, priority, status });
+      navigate(`../ticket/${ticketGuid}`);
     } catch (err) {
       setError(err.message || 'Failed to update ticket.');
       setSubmitting(false);
@@ -58,7 +79,7 @@ export const UpdateTicket = () => {
 
   return (
     <div className="fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <button onClick={() => navigate(`../ticket/${ticketId}`)} className="btn btn-secondary" style={{ marginBottom: '24px' }}>
+      <button onClick={() => navigate(`../ticket/${ticketGuid}`)} className="btn btn-secondary" style={{ marginBottom: '24px' }}>
         <ArrowLeft size={16} /> Back to Ticket
       </button>
 
@@ -79,6 +100,7 @@ export const UpdateTicket = () => {
           </div>
         )}
 
+        {!error || error === 'All fields are required.' || error.includes('Failed to update') ? (
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Ticket Title</label>
@@ -150,6 +172,7 @@ export const UpdateTicket = () => {
             <Save size={18} /> {submitting ? 'Saving Changes...' : 'Save Changes'}
           </button>
         </form>
+        ) : null}
       </div>
     </div>
   );

@@ -33,8 +33,8 @@ export const Shell = ({ children }) => {
   const isCreateActive = location.pathname.endsWith('/create');
 
   return (
-    <div className="app-container">
-      <aside className="sidebar">
+    <div className="helpdesk-app-container">
+      <aside className="helpdesk-sidebar">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
@@ -130,7 +130,7 @@ export const Shell = ({ children }) => {
         </div>
       </aside>
 
-      <main className="main-content">
+      <main className="helpdesk-main-content">
         {children}
       </main>
     </div>

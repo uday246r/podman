@@ -9,7 +9,7 @@ public interface ITicketRepository
         TicketPriority? priority = null,
         string? assignedTo = null);
 
-    Task<Ticket?> GetByIdAsync(int id);
+    Task<Ticket?> GetByIdAsync(Guid guid);
 
     Task AddAsync(Ticket ticket);
 
@@ -18,11 +18,11 @@ public interface ITicketRepository
     Task DeleteAsync(Ticket ticket);
 
     // Comments & History
-    Task<IEnumerable<TicketComment>> GetCommentsAsync(int ticketId);
+    Task<IEnumerable<TicketComment>> GetCommentsAsync(Guid ticketGuid);
 
     Task AddCommentAsync(TicketComment comment);
 
-    Task<IEnumerable<TicketHistory>> GetHistoryAsync(int ticketId);
+    Task<IEnumerable<TicketHistory>> GetHistoryAsync(Guid ticketGuid);
 
     Task AddHistoryAsync(TicketHistory history);
 }

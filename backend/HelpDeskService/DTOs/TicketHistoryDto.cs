@@ -2,9 +2,9 @@ namespace HelpdeskService.DTOs;
 
 public class TicketHistoryDto
 {
-    public int Id { get; set; }
+    public Guid Guid { get; set; }
 
-    public int TicketId { get; set; }
+    public Guid TicketGuid { get; set; }
 
     public string FieldName { get; set; } = string.Empty;
 

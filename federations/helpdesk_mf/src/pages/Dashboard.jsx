@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { getCurrentUser, getUserPermissions } from '../services/authService';
 import { CheckCircle, Clock, FileText, Inbox, ShieldAlert } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -8,15 +9,36 @@ export const Dashboard = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.getTickets()
-      .then(data => {
+    const loadDashboard = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          setError("Authentication required.");
+          setLoading(false);
+          return;
+        }
+
+        const permissions = await getUserPermissions(user.id);
+        const helpdeskPerms = permissions.filter(p => p.moduleName.toLowerCase() === "helpdeskmodule" || p.moduleName === "*");
+        const hasWildcard = helpdeskPerms.some(p => p.action === "*");
+        const canView = hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "view_ticket");
+
+        if (!canView) {
+          setError("You do not have permission to view dashboard (Missing view_ticket permission).");
+          setLoading(false);
+          return;
+        }
+
+        const data = await api.getTickets();
         setTickets(data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         setError(err.message || 'Failed to fetch tickets');
         setLoading(false);
-      });
+      }
+    };
+    
+    loadDashboard();
   }, []);
 
   if (loading) return <div style={{ padding: '24px', color: 'var(--text-secondary)' }}>Loading dashboard...</div>;
@@ -107,7 +129,7 @@ export const Dashboard = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {tickets.slice(0, 5).map(t => (
-                <div key={t.id} style={{
+                <div key={t.guid} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -119,7 +141,7 @@ export const Dashboard = () => {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '4px' }}>{t.title}</div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                      ID: #{t.id} • Created by: {t.createdBy} • Cat: {t.category}
+                      ID: #{t.guid} • Created by: {t.createdBy} • Cat: {t.category}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>

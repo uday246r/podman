@@ -19,8 +19,8 @@ export const App = () => {
         <Route index element={<Dashboard />} />
         <Route path="tickets" element={<TicketList />} />
         <Route path="create" element={<CreateTicket />} />
-        <Route path="ticket/:id" element={<TicketDetails />} />
-        <Route path="update/:id" element={<UpdateTicket />} />
+        <Route path="ticket/:guid" element={<TicketDetails />} />
+        <Route path="update/:guid" element={<UpdateTicket />} />
       </Routes>
     </Shell>
   );

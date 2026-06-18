@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { api, getCurrentUser } from '../services/api.js';
+import { api } from '../services/api.js';
+import { getCurrentUser, getUserPermissions } from '../services/authService';
 import { ArrowLeft, MessageSquare, History, UserCheck, CheckCircle, AlertTriangle, Send } from 'lucide-react';
 
 export const TicketDetails = () => {
-  const { id } = useParams();
+  const { guid } = useParams();
   const navigate = useNavigate();
-  const ticketId = Number(id);
+  const ticketGuid = guid;
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
@@ -19,18 +20,50 @@ export const TicketDetails = () => {
   const [actionError, setActionError] = useState('');
   const [commentSubmitting, setCommentSubmitting] = useState(false);
 
-  const currentUser = getCurrentUser();
+  const [canEdit, setCanEdit] = useState(false);
+  const [canUpdateStatus, setCanUpdateStatus] = useState(false);
+  const [canAssign, setCanAssign] = useState(false);
+  const [canComment, setCanComment] = useState(false);
+
+  const loadPermissions = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) return false;
+      
+      const permissions = await getUserPermissions(user.id);
+      const helpdeskPerms = permissions.filter(p => p.moduleName.toLowerCase() === "helpdeskmodule" || p.moduleName === "*");
+      const hasWildcard = helpdeskPerms.some(p => p.action === "*");
+      
+      setCanEdit(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "edit_ticket"));
+      setCanUpdateStatus(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "update_ticket_status"));
+      setCanAssign(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "assign_ticket"));
+      setCanComment(hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "add_ticket_comment"));
+
+      const canView = hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "view_ticket");
+      return canView;
+    } catch (error) {
+      console.error("Failed to load permissions:", error);
+      return false;
+    }
+  };
 
   const loadAll = async () => {
     try {
-      const ticketData = await api.getTicket(ticketId);
+      const canView = await loadPermissions();
+      if (!canView) {
+        setError("You do not have permission to view ticket details (Missing view_ticket permission).");
+        setLoading(false);
+        return;
+      }
+
+      const ticketData = await api.getTicket(ticketGuid);
       setTicket(ticketData);
       setNewAssignee(ticketData.assignedTo || '');
 
-      const commentsData = await api.getComments(ticketId);
+      const commentsData = await api.getComments(ticketGuid);
       setComments(commentsData);
 
-      const historyData = await api.getHistory(ticketId);
+      const historyData = await api.getHistory(ticketGuid);
       setHistory(historyData);
 
       setLoading(false);
@@ -43,7 +76,7 @@ export const TicketDetails = () => {
   useEffect(() => {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticketId, currentUser.role, currentUser.username]);
+  }, [ticketGuid]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -53,11 +86,11 @@ export const TicketDetails = () => {
     setActionError('');
 
     try {
-      const added = await api.addComment(ticketId, newComment);
+      const added = await api.addComment(ticketGuid, newComment);
       setComments([added, ...comments]);
       setNewComment('');
       
-      const historyData = await api.getHistory(ticketId);
+      const historyData = await api.getHistory(ticketGuid);
       setHistory(historyData);
     } catch (err) {
       setActionError(err.message || 'Failed to add comment.');
@@ -69,10 +102,10 @@ export const TicketDetails = () => {
   const handleUpdateStatus = async (status) => {
     setActionError('');
     try {
-      const updated = await api.updateStatus(ticketId, status);
+      const updated = await api.updateStatus(ticketGuid, status);
       setTicket(updated);
       
-      const historyData = await api.getHistory(ticketId);
+      const historyData = await api.getHistory(ticketGuid);
       setHistory(historyData);
     } catch (err) {
       setActionError(err.message || 'Failed to update status.');
@@ -82,11 +115,11 @@ export const TicketDetails = () => {
   const handleAssign = async () => {
     setActionError('');
     try {
-      const updated = await api.assignTicket(ticketId, newAssignee.trim() || null);
+      const updated = await api.assignTicket(ticketGuid, newAssignee.trim() || null);
       setTicket(updated);
       alert('Ticket assigned successfully!');
       
-      const historyData = await api.getHistory(ticketId);
+      const historyData = await api.getHistory(ticketGuid);
       setHistory(historyData);
     } catch (err) {
       setActionError(err.message || 'Failed to assign ticket.');
@@ -103,9 +136,11 @@ export const TicketDetails = () => {
         <button onClick={() => navigate('../tickets')} className="btn btn-secondary">
           <ArrowLeft size={16} /> Back to List
         </button>
-        <Link to={`../update/${ticket.id}`} className="btn btn-secondary" style={{ borderColor: 'var(--border-glow)' }}>
-          Edit Ticket Properties
-        </Link>
+        {canEdit && (
+          <Link to={`../update/${ticket.guid}`} className="btn btn-secondary" style={{ borderColor: 'var(--border-glow)' }}>
+            Edit Ticket Properties
+          </Link>
+        )}
       </div>
 
       {actionError && (
@@ -133,7 +168,7 @@ export const TicketDetails = () => {
           
           <div className="glass-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)' }}>TICKET #{ticket.id}</span>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)' }}>TICKET #{ticket.guid}</span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <span className={`badge badge-${ticket.status.toLowerCase()}`}>{ticket.status}</span>
                 <span className={`badge badge-${ticket.priority.toLowerCase()}`} style={{ background: 'var(--badge-priority-bg)' }}>{ticket.priority}</span>
@@ -179,28 +214,30 @@ export const TicketDetails = () => {
               <MessageSquare size={20} style={{ color: 'var(--primary)' }} /> Comments ({comments.length})
             </h2>
 
-            <form onSubmit={handleAddComment} style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <input
-                  type="text"
-                  placeholder="Type a comment..."
-                  className="form-control"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  disabled={commentSubmitting}
-                />
-                <button type="submit" className="btn btn-primary" style={{ padding: '0 24px' }} disabled={commentSubmitting || !newComment.trim()}>
-                  <Send size={16} />
-                </button>
-              </div>
-            </form>
+            {canComment && (
+              <form onSubmit={handleAddComment} style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <input
+                    type="text"
+                    placeholder="Type a comment..."
+                    className="form-control"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    disabled={commentSubmitting}
+                  />
+                  <button type="submit" className="btn btn-primary" style={{ padding: '0 24px' }} disabled={commentSubmitting || !newComment.trim()}>
+                    <Send size={16} />
+                  </button>
+                </div>
+              </form>
+            )}
 
             {comments.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>No comments on this ticket yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {comments.map(c => (
-                  <div key={c.id} style={{ display: 'flex', gap: '16px' }}>
+                  <div key={c.guid} style={{ display: 'flex', gap: '16px' }}>
                     <div style={{
                       width: '36px',
                       height: '36px',
@@ -234,10 +271,11 @@ export const TicketDetails = () => {
         {/* Sidebar Controls */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
-          <div className="glass-card">
-            <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle size={18} style={{ color: 'var(--primary)' }} /> Update Status
-            </h2>
+          {canUpdateStatus && (
+            <div className="glass-card">
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle size={18} style={{ color: 'var(--primary)' }} /> Update Status
+              </h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
@@ -274,11 +312,13 @@ export const TicketDetails = () => {
               </button>
             </div>
           </div>
+          )}
 
-          <div className="glass-card">
-            <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UserCheck size={18} style={{ color: 'var(--primary)' }} /> Assignment
-            </h2>
+          {canAssign && (
+            <div className="glass-card">
+              <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UserCheck size={18} style={{ color: 'var(--primary)' }} /> Assignment
+              </h2>
 
             <div className="form-group">
               <label className="form-label">Assignee Username</label>
@@ -294,6 +334,7 @@ export const TicketDetails = () => {
               Apply Assignment
             </button>
           </div>
+          )}
 
           <div className="glass-card">
             <h2 style={{ fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -305,7 +346,7 @@ export const TicketDetails = () => {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
                 {history.map(h => (
-                  <div key={h.id} style={{
+                  <div key={h.guid} style={{
                     fontSize: '12px',
                     borderBottom: '1px solid var(--border-light)',
                     paddingBottom: '10px'

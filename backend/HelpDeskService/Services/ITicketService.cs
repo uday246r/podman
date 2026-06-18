@@ -10,22 +10,22 @@ public interface ITicketService
         TicketPriority? priority = null,
         string? assignedTo = null);
 
-    Task<TicketDto?> GetByIdAsync(int id);
+    Task<TicketDto?> GetByIdAsync(Guid guid);
 
     Task<TicketDto> CreateAsync(CreateTicketDto createDto, string createdBy);
 
-    Task<TicketDto?> UpdateAsync(int id, UpdateTicketDto updateDto, string changedBy);
+    Task<TicketDto?> UpdateAsync(Guid guid, UpdateTicketDto updateDto, string changedBy);
 
-    Task<bool> DeleteAsync(int id);
+    Task<bool> DeleteAsync(Guid guid);
 
-    Task<TicketDto?> UpdateStatusAsync(int id, TicketStatus status, string changedBy);
+    Task<TicketDto?> UpdateStatusAsync(Guid guid, TicketStatus status, string changedBy);
 
-    Task<TicketDto?> AssignAsync(int id, string? assignedTo, string changedBy);
+    Task<TicketDto?> AssignAsync(Guid guid, string? assignedTo, string changedBy);
 
     // Advanced features
-    Task<TicketCommentDto> AddCommentAsync(int ticketId, CreateCommentDto commentDto, string createdBy);
+    Task<TicketCommentDto> AddCommentAsync(Guid ticketGuid, CreateCommentDto commentDto, string createdBy);
 
-    Task<IEnumerable<TicketCommentDto>> GetCommentsAsync(int ticketId);
+    Task<IEnumerable<TicketCommentDto>> GetCommentsAsync(Guid ticketGuid);
 
-    Task<IEnumerable<TicketHistoryDto>> GetHistoryAsync(int ticketId);
+    Task<IEnumerable<TicketHistoryDto>> GetHistoryAsync(Guid ticketGuid);
 }

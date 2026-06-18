@@ -11,6 +11,32 @@ export const CreateTicket = () => {
   const [priority, setPriority] = useState('Low');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [loadingPerms, setLoadingPerms] = useState(true);
+
+  useEffect(() => {
+    const checkPerms = async () => {
+      try {
+        const { getCurrentUser, getUserPermissions } = await import('../services/authService');
+        const user = await getCurrentUser();
+        if (!user) {
+          setError("Authentication required.");
+          setLoadingPerms(false);
+          return;
+        }
+        const permissions = await getUserPermissions(user.id);
+        const helpdeskPerms = permissions.filter(p => p.moduleName.toLowerCase() === "helpdeskmodule" || p.moduleName === "*");
+        const hasWildcard = helpdeskPerms.some(p => p.action === "*");
+        const canCreate = hasWildcard || helpdeskPerms.some(p => p.action.toLowerCase() === "create_ticket");
+        if (!canCreate) {
+          setError("You do not have permission to create tickets.");
+        }
+      } catch (err) {
+        setError("Failed to verify permissions.");
+      }
+      setLoadingPerms(false);
+    };
+    checkPerms();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,8 +80,11 @@ export const CreateTicket = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
+        {loadingPerms ? (
+          <div style={{ color: 'var(--text-secondary)' }}>Checking permissions...</div>
+        ) : !error || error === 'All fields are required.' || error.includes('Failed to create') ? (
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
             <label className="form-label">Ticket Title</label>
             <input
               type="text"
@@ -113,6 +142,7 @@ export const CreateTicket = () => {
             <Save size={18} /> {submitting ? 'Submitting...' : 'File Ticket'}
           </button>
         </form>
+        ) : null}
       </div>
     </div>
   );

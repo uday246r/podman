@@ -20,13 +20,19 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Ticket>()
-            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+            .HasKey(t => t.Guid);
+        modelBuilder.Entity<Ticket>()
+            .Property(t => t.Guid).HasDefaultValueSql("gen_random_uuid()");
 
         modelBuilder.Entity<TicketComment>()
-            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+            .HasKey(t => t.Guid);
+        modelBuilder.Entity<TicketComment>()
+            .Property(t => t.Guid).HasDefaultValueSql("gen_random_uuid()");
 
         modelBuilder.Entity<TicketHistory>()
-            .Property(t => t.Id).HasDefaultValueSql("gen_random_uuid()");
+            .HasKey(t => t.Guid);
+        modelBuilder.Entity<TicketHistory>()
+            .Property(t => t.Guid).HasDefaultValueSql("gen_random_uuid()");
 
         modelBuilder.Entity<Ticket>()
             .Property(t => t.Status)
@@ -40,13 +46,13 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<TicketComment>()
             .HasOne(tc => tc.Ticket)
             .WithMany()
-            .HasForeignKey(tc => tc.TicketId)
+            .HasForeignKey(tc => tc.TicketGuid)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<TicketHistory>()
             .HasOne(th => th.Ticket)
             .WithMany()
-            .HasForeignKey(th => th.TicketId)
+            .HasForeignKey(th => th.TicketGuid)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -162,12 +162,14 @@
   background: white;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .pm-table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
+  white-space: nowrap;
 }
 
 .pm-table th {
@@ -181,6 +183,11 @@
 
 .pm-table th:first-child {
   text-align: left;
+  position: sticky;
+  left: 0;
+  background-color: #f8fafc;
+  z-index: 2;
+  box-shadow: inset -1px 0 0 #e2e8f0;
 }
 
 .pm-table td {
@@ -193,6 +200,11 @@
   text-align: left;
   font-weight: 500;
   color: #0f172a;
+  position: sticky;
+  left: 0;
+  background-color: white;
+  z-index: 1;
+  box-shadow: inset -1px 0 0 #e2e8f0;
 }
 
 /* Custom Toggle Switch */
