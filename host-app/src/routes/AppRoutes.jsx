@@ -4,18 +4,21 @@ import {
   Route,
 } from "react-router-dom";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AccessGuard from "../components/AccessGuard";
-import loadRemote from "../utils/loadRemote";
+// import loadRemote from "../utils/loadRemote";
 import PermissionManagement from "../pages/Admin/PermissionManagement";
 import ModuleMaintenance from "../pages/Admin/ModuleMaintenance";
+import { getModules } from "../services/moduleRegistry";
+import { loadRemoteComponent } from "../utils/federationLoader";
 
 
+/*
 const EmployeeApp = lazy(() =>
   loadRemote(
   import("employee_mf/EmployeeApp"),
@@ -43,8 +46,30 @@ const InventoryApp = lazy(() =>
   "Inventory Module",
   )
 ); 
+*/
 
 function AppRoutes() {
+  const [remoteModules, setRemoteModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchModules() {
+      try {
+        const modules = await getModules();
+        setRemoteModules(modules);
+      } catch (error) {
+        console.error("Failed to fetch modules:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchModules();
+  }, []);
+
+  if (loading) {
+    return <div>Loading routes...</div>;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -62,6 +87,40 @@ function AppRoutes() {
           }
         />
 
+        {remoteModules.map((module) => {
+          const RemoteComponent = lazy(async () => {
+            try {
+              const comp = await loadRemoteComponent(module.name, module.remoteUrl, module.exposedModule);
+              return comp.default ? comp : { default: comp };
+            } catch (err) {
+              console.error(`Failed to load module ${module.name}`, err);
+              return { default: () => <h2>{module.name} service unavailable. Please try again later.</h2> };
+            }
+          });
+
+          // Ensure route has a wildcard for inner routing if not provided
+          const routePath = module.route.endsWith("/*") ? module.route : `${module.route}/*`;
+
+          return (
+            <Route
+              key={module.id}
+              path={routePath}
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <AccessGuard moduleName={module.name}>
+                      <Suspense fallback={<h2>Loading...</h2>}>
+                        <RemoteComponent />
+                      </Suspense>
+                    </AccessGuard>
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+          );
+        })}
+
+        {/* 
         <Route
           path="/employees/*"
           element={
@@ -121,6 +180,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        */}
 
         <Route
           path="/:role/permissions"

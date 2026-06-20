@@ -10,12 +10,13 @@ export default defineConfig(({ mode }) => {
       react(),
       federation({
         name: "host",
-        remotes: {
-          employee_mf: env.VITE_EMPLOYEE_MF_URL,
-          asset_management: env.VITE_ASSET_MF_URL,
-          helpdesk: env.VITE_HELPDESK_MF_URL,
-          inventory: env.VITE_INVENTORY_MF_URL
-        },
+        // remotes: {
+        //   employee_mf: env.VITE_EMPLOYEE_MF_URL,
+        //   asset_management: env.VITE_ASSET_MF_URL,
+        //   helpdesk: env.VITE_HELPDESK_MF_URL,
+        //   inventory: env.VITE_INVENTORY_MF_URL
+        // },
+        remotes: {},
         shared: {
           react: {
             singleton: true,
